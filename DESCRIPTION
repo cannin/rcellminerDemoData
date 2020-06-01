@@ -1,0 +1,23 @@
+Package: rcellminerDemoData
+Title: rcellminerDemoData: Demo data package compatible with rcellminer
+Version: 0.0.1
+Date: 2020-05-20
+Author: Augustin Luna
+Maintainer: Augustin Luna <lunaa@cbio.mskcc.org>
+Description: A demo data package compatible with rcellminer 
+  (https://bioconductor.org/packages/release/bioc/html/rcellminer.html)
+License: LGPL-3 + file LICENSE
+Depends:
+    R (>= 3.1.1),
+    Biobase
+Suggests:
+    knitr,
+    testthat,
+    BiocStyle,
+    rcellminer,
+    stringr
+LazyData: true
+VignetteBuilder: knitr
+biocViews: CancerData, CopyNumberVariationData, ExpressionData, SNPData, NCI,
+    MicroarrayData, miRNAData
+RoxygenNote: 6.0.1

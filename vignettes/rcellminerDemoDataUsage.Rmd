@@ -1,0 +1,114 @@
+---
+title: "Accessing Data"
+output:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Accessing Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r knitrSetup, include=FALSE}
+library(knitr)
+opts_chunk$set(out.extra='style="display:block; margin: auto"', fig.align="center", tidy=TRUE, eval=FALSE)
+```
+
+# Overview
+
+An example project to demonstrate generating experiment datasets compatible with rcellminer. More information available: https://bioconductor.org/packages/release/data/experiment/html/rcellminerData.html
+
+# Basics 
+## Installation 
+
+```{r install, eval=FALSE}
+source("http://bioconductor.org/biocLite.R")
+biocLite("rcellminer")
+```
+
+## Getting Started 
+
+Load **rcellminer** and **rcellminerDemoData** packages: 
+
+```{r loadLibrary, message=FALSE, warning=FALSE}
+library(rcellminer)
+library(rcellminerDemoData)
+```
+
+# Data Structure
+
+Data in **rcellminerDemoData** exists as two S4 class objects: molData and drugData. 
+
+## Molecular Data
+
+**molData** is an instance of the MolData S4 class composed of 2 slots: eSetList and sampleData. eSetList is a list of eSet objects that can be of different dimensions; **NOTE:** in concept this is similar to eSet objects, but differs in that the eSet assayData slot requires that matrices have equal dimensions. The second slot, sampleData, is a MIAxE class instance, but its accessor, getSampleData(), returns a data.frame containing information for each sample. Below are examples of possible operations that can be performed on the MolData object.
+
+```{r}
+# Get the types of feature data in a MolData object.
+names(getAllFeatureData(molData))
+```
+
+An eSetList list member within a MolData object can be referenced directly using the double square bracket operator, as with a normal list and the operation returns an eSet object. In the case of **rcellminerDemoData**, an ExpressionSet is returned which is derived from eSet. Any eSet derived class can potentially be added to the eSetList; adding objects to the eSetList will be described in a later section.
+
+```{r}
+class(molData[["exp"]])
+
+geneExpMat <- exprs(molData[["exp"]])
+```
+
+### Accessing sampleData 
+
+Sample information about a MolData object can be accessed using getSampleData(), which returns a data.frame. For the example NCI-60 data, we provide information the tissue of origin for each cell line. 
+
+```{r}
+getSampleData(molData)[1:10, "Gender"]
+```
+
+### Adding additional data to a MolData object's eSetList
+
+It is possible to add additional datasets into MolData objects, as shown below, where the protein data provided in **rcellminerDemoData** is copied as "test". This provides users flexibility for wider usage of the MolData class. 
+
+```{r}
+# Add data
+molData[["test"]] <- molData[["exp"]]
+
+names(getAllFeatureData(molData))
+```
+
+## Drug Data 
+
+Drug activity (response) data is provided in the **rcellminerDemoData** package for the NCI-60. **drugData** is an instance of the DrugData S4 class that is composed of 3 slots: act, repeatAct, and sampleData. Both act (summarized data across multiple repeats) and repeatAct (row repeat data) are activity data slots are provided as ExpressionSet objects. In the example below, the drugActMat has fewer rows than drugRepeatActMat since the data across multiple repeats has been summarized, but the same number of columns (samples).
+
+```{r}
+drugActMat <- exprs(getAct(drugData))
+dim(drugActMat)
+
+drugRepeatActMat <- exprs(getRepeatAct(drugData))
+dim(drugRepeatActMat)
+```
+
+### featureData for Drug Activities
+
+**rcellminerDemoData** provides a large amount of information on drugs tested on the NCI-60, including structure information, clinical testing status, etc. This data can be extracted using into a data.frame as shown below:
+
+```{r}
+drugAnnotDf <- as(featureData(getAct(drugData)), "data.frame")
+
+colnames(drugAnnotDf)
+```
+
+### sampleData for DrugData Objects
+
+DrugData objects can contain sample data in the same manner as with MolData objects. In the case of **rcellminerDemoData**, the sample data provided for the the drugData object will be identical to that provided for the molData object. 
+
+```{r}
+identical(getSampleData(molData), getSampleData(drugData))
+```
+
+# Session Information
+
+```{r sessionInfo, eval=TRUE}
+sessionInfo()
+```
+
